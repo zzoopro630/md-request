@@ -83,7 +83,8 @@ const SimplePage = () => {
         };
         setSelectedItems(prev => [...prev, newItem]);
     }
-    
+    // Reset selection to initial state after adding
+    setSelectedDbType('A');
     setSelectedType('');
     setSelectedRegion('');
   };
@@ -249,7 +250,7 @@ const SimplePage = () => {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="affiliation">소속</Label>
-                  <Select name="affiliation" onValueChange={(value) => handleSelectChange('affiliation', value)}><SelectTrigger><SelectValue placeholder="소속을 선택하세요" /></SelectTrigger><SelectContent>{affiliations.map(aff => <SelectItem key={aff} value={aff}>{aff}</SelectItem>)}</SelectContent></Select>
+                  <Select name="affiliation" onValueChange={(value) => handleSelectChange('affiliation', value)}><SelectTrigger><SelectValue placeholder="소속을하세요" /></SelectTrigger><SelectContent>{affiliations.map(aff => <SelectItem key={aff} value={aff}>{aff}</SelectItem>)}</SelectContent></Select>
                   {displayErrors.affiliation && <p className="text-sm text-red-500">{displayErrors.affiliation}</p>}
                 </div>
                 <div className="space-y-1">

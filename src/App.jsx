@@ -6,7 +6,7 @@ import { navItems } from "./nav-items";
 import Index from "./pages/Index";
 import HistoryPage from "./pages/HistoryPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
-import SimplePage from "./pages/SimplePage";
+import CheckboxGridPage from "./pages/CheckboxGridPage";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +19,7 @@ const App = () => (
           {navItems.map(({ to, page }) => (
             <Route key={to} path={to} element={page} />
           ))}
-          <Route path="/" element={<SimplePage />} />
+          <Route path="/" element={<CheckboxGridPage />} />
           <Route path="/complex" element={<Index />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/order-confirmation" element={<OrderConfirmationPage />} />

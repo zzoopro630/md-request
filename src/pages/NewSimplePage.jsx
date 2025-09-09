@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Trash2 } from 'lucide-react';
 
+// --- Data --- //
 const affiliations = ["GOAT", "감동", "다올", "다원", "달", "라온", "유럽", "직할", "캐슬", "해성", "혜윰"];
 const regions = ["수도권", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
 const companyTypes = {
@@ -20,44 +21,51 @@ const companyTypes = {
   ]
 };
 
-const SimplePage = () => {
+// --- The New Component --- //
+const NewSimplePage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: '', affiliation: '', phone: '010-', email: '' });
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [displayErrors, setDisplayErrors] = useState({});
-  const [emailKoreanWarning, setEmailKoreanWarning] = useState('');
-  const [nameEnglishWarning, setNameEnglishWarning] = useState('');
 
-  // Simplified state for DB selection
+  // --- State Management --- //
+  // Applicant Info
+  const [formData, setFormData] = useState({ name: '', affiliation: '', phone: '010-', email: '' });
+  
+  // DB Selection
   const [selectedDbType, setSelectedDbType] = useState('A');
   const [selectedType, setSelectedType] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
+  const [resetCounter, setResetCounter] = useState(0);
 
+  // Application List
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [total, setTotal] = useState(0);
+
+  // UI State
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [displayErrors, setDisplayErrors] = useState({});
+  const [nameEnglishWarning, setNameEnglishWarning] = useState('');
+  const [emailKoreanWarning, setEmailKoreanWarning] = useState('');
+
+  // --- Effects --- //
+  // Recalculate total when list changes
   useEffect(() => {
     const newTotal = selectedItems.reduce((sum, item) => sum + item.total, 0);
     setTotal(newTotal);
   }, [selectedItems]);
 
-  useEffect(() => {
-    const koreanRegex = /[ㄱ-ㅎ|가-힣]/;
-    if (koreanRegex.test(formData.email)) {
-        setEmailKoreanWarning('이메일 주소에는 한글을 사용할 수 없습니다.');
-    } else {
-        setEmailKoreanWarning('');
-    }
-  }, [formData.email]);
-
+  // Real-time validation for name field
   useEffect(() => {
     const englishRegex = /[a-zA-Z]/;
-    if (englishRegex.test(formData.name)) {
-        setNameEnglishWarning('이름에는 영문을 사용할 수 없습니다.');
-    } else {
-        setNameEnglishWarning('');
-    }
+    setNameEnglishWarning(englishRegex.test(formData.name) ? '이름에는 영문을 사용할 수 없습니다.' : '');
   }, [formData.name]);
 
+  // Real-time validation for email field
+  useEffect(() => {
+    const koreanRegex = /[ㄱ-ㅎ|가-힣]/;
+    setEmailKoreanWarning(koreanRegex.test(formData.email) ? '이메일 주소에는 한글을 사용할 수 없습니다.' : '');
+  }, [formData.email]);
+
+
+  // --- Handlers --- //
   const handleAddItem = () => {
     if (!selectedType || !selectedRegion) return;
 
@@ -67,64 +75,39 @@ const SimplePage = () => {
         item.type === selectedType
     );
 
-    if (!itemExists) {
-        const typeInfo = companyTypes[selectedDbType].find(t => t.name === selectedType);
-        if (!typeInfo) return;
-
-        const newItem = {
-            id: Date.now(),
-            dbType: selectedDbType,
-            name: `${selectedDbType}업체 - ${selectedType} (${selectedRegion})`,
-            region: selectedRegion,
-            type: selectedType,
-            quantity: 1,
-            price: typeInfo.price,
-            total: typeInfo.price
-        };
-        setSelectedItems(prev => [...prev, newItem]);
+    if (itemExists) {
+      // Optional: Add a toast notification or alert that item is already in the list
+      alert("이미 신청 내역에 추가된 항목입니다.");
+      return;
     }
-    
+
+    const typeInfo = companyTypes[selectedDbType].find(t => t.name === selectedType);
+    if (!typeInfo) return;
+
+    const newItem = {
+        id: Date.now(),
+        dbType: selectedDbType,
+        name: `${selectedDbType}업체 - ${selectedType} (${selectedRegion})`,
+        region: selectedRegion,
+        type: selectedType,
+        quantity: 1,
+        price: typeInfo.price,
+        total: typeInfo.price
+    };
+    setSelectedItems(prev => [...prev, newItem]);
+
+    // Reset only type and region selection, keep DB type
     setSelectedType('');
     setSelectedRegion('');
-  };
-
-  const handleInputChange = (e) => {
-    setDisplayErrors({});
-    const { name, value } = e.target;
-    if (name === 'phone') {
-        const digits = value.replace(/[^\d]/g, '').substring(3);
-        let formattedPhone = '010-';
-        if (digits.length > 0) {
-            formattedPhone += digits.substring(0, 4);
-        }
-        if (digits.length > 4) {
-            formattedPhone += '-' + digits.substring(4, 8);
-        }
-        setFormData(prev => ({ ...prev, phone: formattedPhone }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleSelectChange = (name, value) => {
-    setDisplayErrors({});
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setResetCounter(prev => prev + 1);
   };
 
   const handleQuantityChangeInList = (id, newQuantity) => {
     const quantity = Math.max(0, parseInt(newQuantity, 10) || 0);
-    
     setSelectedItems(prevItems => 
-        prevItems.map(item => {
-            if (item.id === id) {
-                return {
-                    ...item,
-                    quantity: quantity,
-                    total: quantity * item.price
-                };
-            }
-            return item;
-        }).filter(item => item.quantity > 0)
+        prevItems.map(item => 
+            item.id === id ? { ...item, quantity, total: quantity * item.price } : item
+        ).filter(item => item.quantity > 0)
     );
   };
 
@@ -132,56 +115,65 @@ const SimplePage = () => {
     setSelectedItems(prev => prev.filter(item => item.id !== id));
   };
 
-  const validate = () => {
-      const newErrors = {};
-      if (!formData.name || nameEnglishWarning) newErrors.name = "이름을 확인해주세요";
-      if (!formData.affiliation) newErrors.affiliation = "소속을 확인해주세요";
-      if (!/^010-\d{4}-\d{4}$/.test(formData.phone)) newErrors.phone = "전화번호를 확인해주세요";
-      if (!formData.email || emailKoreanWarning) newErrors.email = "이메일을 입력해주세요";
-      if (selectedItems.length === 0) newErrors.items = "하나 이상의 DB를 신청내역에 추가해주세요.";
-      return newErrors;
-  }
+  const handleApplicantInfoChange = (e) => {
+    setDisplayErrors({});
+    const { name, value } = e.target;
+
+    if (name === 'phone') {
+        const digits = value.replace(/[^\d]/g, '').substring(3);
+        let formattedPhone = '010-';
+        if (digits.length > 0) formattedPhone += digits.substring(0, 4);
+        if (digits.length > 4) formattedPhone += '-' + digits.substring(4, 8);
+        setFormData(prev => ({ ...prev, phone: formattedPhone }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleAffiliationChange = (value) => {
+    setDisplayErrors({});
+    setFormData(prev => ({ ...prev, affiliation: value }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-        setDisplayErrors(validationErrors);
+    // Validation
+    const newErrors = {};
+    if (!formData.name) newErrors.name = "이름을 확인해주세요";
+    if (nameEnglishWarning) newErrors.name = nameEnglishWarning;
+    if (!formData.affiliation) newErrors.affiliation = "소속을 확인해주세요";
+    if (!/^010-\d{4}-\d{4}$/.test(formData.phone)) newErrors.phone = "전화번호를 확인해주세요";
+    if (!formData.email) newErrors.email = "이메일을 입력해주세요";
+    if (emailKoreanWarning) newErrors.email = emailKoreanWarning;
+    if (selectedItems.length === 0) newErrors.items = "하나 이상의 DB를 신청내역에 추가해주세요.";
+
+    if (Object.keys(newErrors).length > 0) {
+        setDisplayErrors(newErrors);
         return;
     }
     
     setDisplayErrors({});
     setIsSubmitting(true);
 
+    // EmailJS Logic
     const serviceID = 'service_gf7tr94';
     const templateID = 'template_5wlvuso';
     const publicKey = 'si6sUamB5hB5f3V6d';
-
-    const itemsSummary = selectedItems.map(item => 
-        `${item.name} - 수량: ${item.quantity}, 금액: ${item.total.toLocaleString()}원`
-    ).join('<br>');
-
-    const templateParams = { 
-        ...formData,
-        items_summary: itemsSummary, 
-        total: total.toLocaleString(), 
-        to_email: formData.email, 
-        admin_email: 'songnakjoo@gmail.com' 
-    };
+    const itemsSummary = selectedItems.map(item => `${item.name} - 수량: ${item.quantity}, 금액: ${item.total.toLocaleString()}원`).join('<br>');
+    const templateParams = { ...formData, items_summary: itemsSummary, total: total.toLocaleString() };
     
     emailjs.init(publicKey);
     emailjs.send(serviceID, templateID, templateParams)
-      .then((response) => {
-        console.log('SUCCESS! - Admin', response.status, response.text);
+      .then(() => {
         navigate('/order-confirmation');
       }, (err) => {
-        console.error('FAILED... - Admin', err);
-        setDisplayErrors({ submit: `관리자 이메일 발송에 실패했습니다: ${err.text}` });
+        setDisplayErrors({ submit: `이메일 발송에 실패했습니다: ${err.text}` });
         setIsSubmitting(false);
       });
   };
 
+  // --- JSX --- //
   return (
     <div className="min-h-screen bg-white p-4">
       <div className="max-w-2xl mx-auto pt-8">
@@ -194,7 +186,7 @@ const SimplePage = () => {
               
               <div className="p-4 border rounded-md space-y-4">
                 <h3 className="font-semibold">DB 선택</h3>
-                <RadioGroup value={selectedDbType} onValueChange={(v) => {setSelectedDbType(v); setSelectedType(''); setSelectedRegion('');}} className="flex space-x-4">
+                <RadioGroup value={selectedDbType} onValueChange={(v) => {setSelectedDbType(v); setSelectedType(''); setSelectedRegion(''); setResetCounter(prev => prev + 1);}} className="flex space-x-4">
                     <div className="flex items-center space-x-2"><RadioGroupItem value="A" id="db-a" /><Label htmlFor="db-a">A업체</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="B" id="db-b" /><Label htmlFor="db-b">B업체</Label></div>
                 </RadioGroup>
@@ -202,11 +194,11 @@ const SimplePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                         <Label>유형</Label>
-                        <Select value={selectedType || undefined} onValueChange={setSelectedType}><SelectTrigger><SelectValue placeholder="유형 선택" /></SelectTrigger><SelectContent>{companyTypes[selectedDbType].map(t => <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>)}</SelectContent></Select>
+                        <Select key={resetCounter} onValueChange={setSelectedType}><SelectTrigger><SelectValue placeholder="유형 선택" /></SelectTrigger><SelectContent>{companyTypes[selectedDbType].map(t => <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>)}</SelectContent></Select>
                     </div>
                     <div className="space-y-1">
                         <Label>지역</Label>
-                        <Select value={selectedRegion || undefined} onValueChange={setSelectedRegion}><SelectTrigger><SelectValue placeholder="지역 선택" /></SelectTrigger><SelectContent>{regions.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent></Select>
+                        <Select key={`region-${selectedRegion}`} value={selectedRegion || undefined} onValueChange={setSelectedRegion}><SelectTrigger><SelectValue placeholder="지역 선택" /></SelectTrigger><SelectContent>{regions.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent></Select>
                     </div>
                 </div>
                 <Button type="button" onClick={handleAddItem} disabled={!selectedType || !selectedRegion} className="w-full">신청 내역에 추가</Button>
@@ -243,23 +235,23 @@ const SimplePage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="name">이름</Label>
-                  <Input id="name" name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="한글로 입력하세요" />
+                  <Input id="name" name="name" type="text" value={formData.name} onChange={handleApplicantInfoChange} placeholder="한글로 입력하세요" />
                   {nameEnglishWarning && <p className="text-sm text-yellow-600 mt-1">{nameEnglishWarning}</p>}
                   {displayErrors.name && <p className="text-sm text-red-500">{displayErrors.name}</p>}
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="affiliation">소속</Label>
-                  <Select name="affiliation" onValueChange={(value) => handleSelectChange('affiliation', value)}><SelectTrigger><SelectValue placeholder="소속을 선택하세요" /></SelectTrigger><SelectContent>{affiliations.map(aff => <SelectItem key={aff} value={aff}>{aff}</SelectItem>)}</SelectContent></Select>
+                  <Select onValueChange={handleAffiliationChange}><SelectTrigger><SelectValue placeholder="소속을 선택하세요" /></SelectTrigger><SelectContent>{affiliations.map(aff => <SelectItem key={aff} value={aff}>{aff}</SelectItem>)}</SelectContent></Select>
                   {displayErrors.affiliation && <p className="text-sm text-red-500">{displayErrors.affiliation}</p>}
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="phone">전화번호</Label>
-                  <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="010-0000-0000" />
+                  <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleApplicantInfoChange} placeholder="010-0000-0000" />
                   {displayErrors.phone && <p className="text-sm text-red-500">{displayErrors.phone}</p>}
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="email">이메일</Label>
-                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="이메일을 입력하세요" />
+                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleApplicantInfoChange} placeholder="이메일을 입력하세요" />
                   {emailKoreanWarning && <p className="text-sm text-yellow-600 mt-1">{emailKoreanWarning}</p>}
                   {displayErrors.email && <p className="text-sm text-red-500 mt-1">{displayErrors.email}</p>}
                 </div>
@@ -286,4 +278,4 @@ const SimplePage = () => {
   );
 };
 
-export default SimplePage;
+export default NewSimplePage;
