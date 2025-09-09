@@ -132,9 +132,9 @@ const SimplePage = () => {
     setErrors({});
     setIsSubmitting(true);
 
-    const serviceID = 'service_gf7tr94';
-    const templateID = 'template_5wlvuso';
-    const publicKey = 'si6sUamB5hB5f3V6d';
+    const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     const itemsSummary = selectedItems.map(item => 
         `${item.name} - 수량: ${item.quantity}, 금액: ${item.total.toLocaleString()}원`
