@@ -209,10 +209,14 @@ const CheckboxGridPage = () => {
                 <div className="p-4 border rounded-md space-y-2">
                     <h3 className="font-semibold">신청 내역</h3>
                     {selectedItems.map((item, index) => (
-                        <div key={item.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
-                            <span className="w-2/5">{index + 1}. {item.name}</span>
-                            <div className="flex items-center gap-2 w-3/5 justify-end">
-                                <div className="flex items-center">
+                        <div key={item.id} className="p-3 bg-gray-50 rounded-md space-y-2">
+                            {/* 첫 번째 줄: 제품명 */}
+                            <div className="font-medium text-sm">
+                                {index + 1}. {item.name}
+                            </div>
+                            {/* 두 번째 줄: 수량 조절, 가격, 삭제 버튼 */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
                                     <Button type="button" variant="outline" size="icon" className="h-8 w-8 rounded-r-none" onClick={() => handleQuantityChangeInList(item.id, item.quantity - 1)}>-</Button>
                                     <Input 
                                         type="number" 
@@ -223,11 +227,22 @@ const CheckboxGridPage = () => {
                                     />
                                     <Button type="button" variant="outline" size="icon" className="h-8 w-8 rounded-l-none" onClick={() => handleQuantityChangeInList(item.id, item.quantity + 1)}>+</Button>
                                 </div>
-                                <span className="w-28 text-right">{item.total.toLocaleString()}원</span>
-                                <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-blue-600">{item.total.toLocaleString()}원</span>
+                                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}>
+                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     ))}
+                </div>
+              )}
+
+              {/* 총 금액 표시 */}
+              {selectedItems.length > 0 && (
+                <div className="text-xl font-bold text-right bg-blue-50 p-4 rounded-md border-2 border-blue-200">
+                  총 금액: {total.toLocaleString()}원
                 </div>
               )}
 
@@ -258,10 +273,6 @@ const CheckboxGridPage = () => {
               </div>
 
               {displayErrors.items && <p className="text-sm text-red-500 text-center">{displayErrors.items}</p>}
-              
-              <div className="text-xl font-bold text-right">
-                총 금액: {total.toLocaleString()}원
-              </div>
 
               <Button type="submit" className="w-full text-white btn-gradient-flow transition-transform duration-300 hover:scale-105" disabled={isSubmitting || selectedItems.length === 0 || !!emailKoreanWarning || !!nameEnglishWarning}>
                 {isSubmitting ? '신청하는 중...' : '신청하기'}
