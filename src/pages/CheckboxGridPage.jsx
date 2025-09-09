@@ -269,7 +269,16 @@ const CheckboxGridPage = () => {
               {displayErrors.submit && <p className="text-sm text-red-500 text-center">{displayErrors.submit}</p>}
             </form>
             <div className="mt-8 flex justify-center">
-                <img src="/logo_black.png" alt="Logo" className="h-7" />
+                <img 
+                    src="/logo_black.png?v=1" 
+                    alt="Logo" 
+                    className="h-7 max-w-full" 
+                    loading="eager"
+                    onError={(e) => {
+                        console.error('Logo loading failed');
+                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjMwIiB2aWV3Qm94PSIwIDAgMTAwIDMwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHg9IjUwIiB5PSIxNSIgZmlsbD0iYmxhY2siIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9IjAuM2VtIj5Mb2dvPC90ZXh0Pjwvc3ZnPg==';
+                    }}
+                />
             </div>
           </CardContent>
         </Card>
