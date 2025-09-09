@@ -222,7 +222,7 @@ const CheckboxGridPage = () => {
                                         type="number" 
                                         value={item.quantity} 
                                         onChange={(e) => handleQuantityChangeInList(item.id, e.target.value)}
-                                        className="w-12 h-8 text-center rounded-none border-l-0 border-r-0"
+                                        className="w-16 h-8 text-center rounded-none border-l-0 border-r-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                                         min="0"
                                     />
                                     <Button type="button" variant="outline" size="icon" className="h-8 w-8 rounded-l-none" onClick={() => handleQuantityChangeInList(item.id, item.quantity + 1)}>+</Button>
