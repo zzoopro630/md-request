@@ -74,3 +74,26 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.btn-gradient-flow {
+  background: linear-gradient(-45deg, #4f46e5, #c026d3, #ec4899, #22d3ee);
+  background-size: 400% 400%;
+  animation: gradient-flow 15s ease infinite;
+  color: white; /* Ensure text is readable */
+}
+
+.btn-gradient-flow:hover {
+    animation-duration: 3s;
+}

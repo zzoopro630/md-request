@@ -3,10 +3,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { navItems } from "./nav-items";
-import TemplatePage from "./pages/TemplatePage";
 import Index from "./pages/Index";
 import HistoryPage from "./pages/HistoryPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import SimplePage from "./pages/SimplePage";
 
 const queryClient = new QueryClient();
 
@@ -19,8 +19,8 @@ const App = () => (
           {navItems.map(({ to, page }) => (
             <Route key={to} path={to} element={page} />
           ))}
-          <Route path="/" element={<Index />} />
-          <Route path="/template" element={<TemplatePage />} />
+          <Route path="/" element={<SimplePage />} />
+          <Route path="/complex" element={<Index />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
         </Routes>
