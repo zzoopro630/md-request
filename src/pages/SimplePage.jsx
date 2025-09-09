@@ -154,9 +154,9 @@ const SimplePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#172858] p-4">
+    <div className="min-h-screen bg-white p-4">
       <div className="max-w-2xl mx-auto pt-8">
-        <Card>
+        <Card className="border border-gray-300">
           <CardHeader>
             <CardTitle className="text-4xl text-center">퍼스트 DB 신청</CardTitle>
           </CardHeader>
