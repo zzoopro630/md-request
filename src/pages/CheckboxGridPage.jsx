@@ -10,15 +10,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2 } from 'lucide-react';
 
 const affiliations = ["GOAT", "감동", "다올", "다원", "달", "라온", "유럽", "직할", "캐슬", "해성", "혜윰"];
-const regions = ["수도권", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
-const companyTypes = {
-  A: [{ name: "보장분석", price: 75000 }],
-  B: [
-    { name: "보장분석", price: 75000 },
-    { name: "여성100%", price: 85000 },
-    { name: "실버", price: 50000 },
-  ]
-};
+const products = [
+  { name: "웰컴키트", price: 33000 },
+  { name: "보험가이드북", price: 9200 },
+  { name: "바인더+볼펜", price: 19000 },
+  { name: "고객노트", price: 3500 },
+  { name: "기프트박스", price: 1500 },
+  { name: "사원증", price: 14000 }
+];
 
 const CheckboxGridPage = () => {
   const navigate = useNavigate();
@@ -48,32 +47,27 @@ const CheckboxGridPage = () => {
     setEmailKoreanWarning(koreanRegex.test(formData.email) ? '이메일 주소에는 한글을 사용할 수 없습니다.' : '');
   }, [formData.email]);
 
-  const handleCheckboxChange = (dbType, typeName, region, checked) => {
-    const key = `${dbType}-${typeName}-${region}`;
-    const typeInfo = companyTypes[dbType].find(t => t.name === typeName);
+  const handleCheckboxChange = (productName, checked) => {
+    const productInfo = products.find(p => p.name === productName);
     
     if (checked) {
       // 항목 추가
       const newItem = {
         id: Date.now() + Math.random(),
-        dbType,
-        name: `${dbType}업체 - ${typeName} (${region})`,
-        region,
-        type: typeName,
+        name: productName,
+        type: productName,
         quantity: 1,
-        price: typeInfo.price,
-        total: typeInfo.price
+        price: productInfo.price,
+        total: productInfo.price
       };
       setSelectedItems(prev => [...prev, newItem]);
-      setSelections(prev => ({ ...prev, [key]: true }));
+      setSelections(prev => ({ ...prev, [productName]: true }));
     } else {
       // 항목 제거
-      setSelectedItems(prev => prev.filter(item => 
-        !(item.dbType === dbType && item.type === typeName && item.region === region)
-      ));
+      setSelectedItems(prev => prev.filter(item => item.type !== productName));
       setSelections(prev => {
         const newSelections = { ...prev };
-        delete newSelections[key];
+        delete newSelections[productName];
         return newSelections;
       });
     }
@@ -91,10 +85,9 @@ const CheckboxGridPage = () => {
   const handleRemoveItem = (id) => {
     const itemToRemove = selectedItems.find(item => item.id === id);
     if (itemToRemove) {
-      const key = `${itemToRemove.dbType}-${itemToRemove.type}-${itemToRemove.region}`;
       setSelections(prev => {
         const newSelections = { ...prev };
-        delete newSelections[key];
+        delete newSelections[itemToRemove.type];
         return newSelections;
       });
     }
@@ -131,7 +124,7 @@ const CheckboxGridPage = () => {
     if (!/^010-\d{4}-\d{4}$/.test(formData.phone)) newErrors.phone = "전화번호를 확인해주세요";
     if (!formData.email) newErrors.email = "이메일을 입력해주세요";
     if (emailKoreanWarning) newErrors.email = emailKoreanWarning;
-    if (selectedItems.length === 0) newErrors.items = "하나 이상의 DB를 신청내역에 추가해주세요.";
+    if (selectedItems.length === 0) newErrors.items = "하나 이상의 상품을 신청내역에 추가해주세요.";
 
     if (Object.keys(newErrors).length > 0) {
         setDisplayErrors(newErrors);
@@ -162,46 +155,34 @@ const CheckboxGridPage = () => {
       <div className="max-w-4xl mx-auto pt-8">
         <Card className="border border-gray-300">
           <CardHeader>
-            <CardTitle className="text-4xl text-center">퍼스트 DB 신청</CardTitle>
+            <CardTitle className="text-4xl text-center">퍼스트 MD 신청</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               
-              {/* DB 선택 섹션 */}
+              {/* 상품 선택 섹션 */}
               <div className="space-y-6">
-                <h3 className="font-semibold text-lg">DB 선택</h3>
+                <h3 className="font-semibold text-lg">상품 선택</h3>
                 
-                {Object.entries(companyTypes).map(([dbType, types]) => (
-                  <Card key={dbType} className="p-4">
-                    <h4 className="font-medium mb-3">{dbType}업체</h4>
-                    <div className="space-y-4">
-                      {types.map(type => (
-                        <div key={type.name} className="border rounded-lg p-3">
-                          <div className="font-medium mb-2">
-                            {type.name} ({type.price.toLocaleString()}원)
-                          </div>
-                          <div className="grid grid-cols-3 gap-1">
-                            {regions.map(region => {
-                              const key = `${dbType}-${type.name}-${region}`;
-                              return (
-                                <div key={region} className="flex items-center space-x-1">
-                                  <Checkbox
-                                    id={key}
-                                    checked={selections[key] || false}
-                                    onCheckedChange={(checked) => 
-                                      handleCheckboxChange(dbType, type.name, region, checked)
-                                    }
-                                  />
-                                  <Label htmlFor={key} className="text-sm">{region}</Label>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {products.map(product => (
+                    <Card key={product.name} className="p-4">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          id={product.name}
+                          checked={selections[product.name] || false}
+                          onCheckedChange={(checked) => 
+                            handleCheckboxChange(product.name, checked)
+                          }
+                        />
+                        <Label htmlFor={product.name} className="flex-1 cursor-pointer">
+                          <div className="font-medium">{product.name}</div>
+                          <div className="text-sm text-gray-600">{product.price.toLocaleString()}원</div>
+                        </Label>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
 
               {/* 선택된 항목들 */}
