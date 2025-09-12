@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2 } from 'lucide-react';
+import AddressInput from '@/components/AddressInput';
 
 const affiliations = ["GOAT", "감동", "다올", "다원", "달", "라온", "유럽", "직할", "캐슬", "해성", "혜윰"];
 const products = [
@@ -22,7 +23,15 @@ const products = [
 
 const CheckboxGridPage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: '', affiliation: '', phone: '010-', email: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    affiliation: '', 
+    phone: '010-', 
+    email: '',
+    address: '',
+    postalCode: '',
+    detailAddress: ''
+  });
   const [selectedItems, setSelectedItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -181,6 +190,20 @@ const CheckboxGridPage = () => {
     }
   };
 
+  const handleAddressChange = (e) => {
+    setDisplayErrors({});
+    setFormData(prev => ({ ...prev, address: e.target.value }));
+  };
+
+  const handlePostalCodeChange = (e) => {
+    setFormData(prev => ({ ...prev, postalCode: e.target.value }));
+  };
+
+  const handleDetailAddressChange = (e) => {
+    setDisplayErrors({});
+    setFormData(prev => ({ ...prev, detailAddress: e.target.value }));
+  };
+
   const handleAffiliationChange = (value) => {
     setDisplayErrors({});
     setFormData(prev => ({ ...prev, affiliation: value }));
@@ -196,6 +219,8 @@ const CheckboxGridPage = () => {
     if (!/^010-\d{4}-\d{4}$/.test(formData.phone)) newErrors.phone = "전화번호를 확인해주세요";
     if (!formData.email) newErrors.email = "이메일을 입력해주세요";
     if (emailKoreanWarning) newErrors.email = emailKoreanWarning;
+    if (!formData.address) newErrors.address = "주소를 입력해주세요";
+    if (!formData.detailAddress && formData.address) newErrors.detailAddress = "상세주소를 입력해주세요";
     if (selectedItems.length === 0) newErrors.items = "하나 이상의 상품을 신청내역에 추가해주세요.";
 
     if (Object.keys(newErrors).length > 0) {
@@ -210,7 +235,8 @@ const CheckboxGridPage = () => {
     const templateID = 'template_5wlvuso';
     const publicKey = 'si6sUamB5hB5f3V6d';
     const itemsSummary = selectedItems.map(item => `${item.name} - 수량: ${item.quantity}, 금액: ${item.total.toLocaleString()}원`).join('<br>');
-    const templateParams = { ...formData, items_summary: itemsSummary, total: total.toLocaleString() };
+    const fullAddress = `[우: ${formData.postalCode}] ${formData.address} ${formData.detailAddress}`;
+    const templateParams = { ...formData, items_summary: itemsSummary, total: total.toLocaleString(), full_address: fullAddress };
     
     emailjs.init(publicKey);
     emailjs.send(serviceID, templateID, templateParams)
@@ -236,7 +262,7 @@ const CheckboxGridPage = () => {
               <div className="space-y-6">
                 <h3 className="font-semibold text-lg">상품 선택</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {products.map(product => (
                     <Card key={product.name} className="p-4">
                       <div className="flex items-center space-x-3">
@@ -323,6 +349,22 @@ const CheckboxGridPage = () => {
                   {emailKoreanWarning && <p className="text-sm text-yellow-600 mt-1">{emailKoreanWarning}</p>}
                   {displayErrors.email && <p className="text-sm text-red-500 mt-1">{displayErrors.email}</p>}
                 </div>
+              </div>
+
+              {/* 주소 입력 */}
+              <div className="space-y-4">
+                <Label>배송지 입력</Label>
+                <AddressInput
+                  addressValue={formData.address}
+                  postalCodeValue={formData.postalCode}
+                  detailAddressValue={formData.detailAddress}
+                  onAddressChange={handleAddressChange}
+                  onPostalCodeChange={handlePostalCodeChange}
+                  onDetailAddressChange={handleDetailAddressChange}
+                  name="deliveryAddress"
+                />
+                {displayErrors.address && <p className="text-sm text-red-500">{displayErrors.address}</p>}
+                {displayErrors.detailAddress && <p className="text-sm text-red-500">{displayErrors.detailAddress}</p>}
               </div>
 
               {displayErrors.items && <p className="text-sm text-red-500 text-center">{displayErrors.items}</p>}
