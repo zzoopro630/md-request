@@ -16,7 +16,8 @@ const products = [
   { name: "바인더+볼펜", price: 19000 },
   { name: "고객노트", price: 3500 },
   { name: "기프트박스", price: 1500 },
-  { name: "사원증", price: 14000 }
+  { name: "사원증", price: 14000 },
+  { name: "쇼핑백", price: 1000 }
 ];
 
 const CheckboxGridPage = () => {
