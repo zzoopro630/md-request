@@ -256,7 +256,7 @@ const CheckboxGridPage = () => {
             <CardTitle className="text-4xl text-center">퍼스트 MD 신청</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
               
               {/* 상품 선택 섹션 */}
               <div className="space-y-6">
@@ -369,7 +369,7 @@ const CheckboxGridPage = () => {
 
               {displayErrors.items && <p className="text-sm text-red-500 text-center">{displayErrors.items}</p>}
 
-              <Button type="submit" className="w-full text-white btn-gradient-flow transition-transform duration-300 hover:scale-105" disabled={isSubmitting || selectedItems.length === 0 || !!emailKoreanWarning || !!nameEnglishWarning}>
+              <Button type="button" onClick={handleSubmit} className="w-full text-white btn-gradient-flow transition-transform duration-300 hover:scale-105" disabled={isSubmitting || selectedItems.length === 0 || !!emailKoreanWarning || !!nameEnglishWarning}>
                 {isSubmitting ? '신청하는 중...' : '신청하기'}
               </Button>
               {displayErrors.submit && <p className="text-sm text-red-500 text-center">{displayErrors.submit}</p>}
