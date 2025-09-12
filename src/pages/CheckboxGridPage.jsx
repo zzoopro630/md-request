@@ -47,6 +47,77 @@ const CheckboxGridPage = () => {
     setEmailKoreanWarning(koreanRegex.test(formData.email) ? '이메일 주소에는 한글을 사용할 수 없습니다.' : '');
   }, [formData.email]);
 
+  // 높이 변화 감지 및 부모 창에 전달 (iframe 사용시)
+  useEffect(() => {
+    const sendHeight = () => {
+      const height = Math.max(
+        document.documentElement.scrollHeight,
+        document.documentElement.offsetHeight,
+        document.body.scrollHeight,
+        document.body.offsetHeight
+      );
+      
+      // 부모 창이 있는 경우 (iframe 내부에서 실행되는 경우)
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'resize',
+          height: height + 50 // 여유 공간 추가
+        }, '*');
+      }
+    };
+
+    // 초기 높이 전송
+    sendHeight();
+
+    // ResizeObserver로 높이 변화 감지
+    const resizeObserver = new ResizeObserver(() => {
+      setTimeout(sendHeight, 100); // 약간의 지연을 주어 렌더링 완료 후 측정
+    });
+
+    // MutationObserver로 DOM 변화 감지
+    const mutationObserver = new MutationObserver(() => {
+      setTimeout(sendHeight, 100);
+    });
+
+    // 관찰 시작
+    resizeObserver.observe(document.body);
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
+
+    // 윈도우 리사이즈 이벤트도 감지
+    window.addEventListener('resize', sendHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      window.removeEventListener('resize', sendHeight);
+    };
+  }, []);
+
+  // 선택된 항목이나 폼 상태가 변경될 때마다 높이 재계산
+  useEffect(() => {
+    const sendHeight = () => {
+      const height = Math.max(
+        document.documentElement.scrollHeight,
+        document.documentElement.offsetHeight,
+        document.body.scrollHeight,
+        document.body.offsetHeight
+      );
+      
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'resize',
+          height: height + 50
+        }, '*');
+      }
+    };
+
+    setTimeout(sendHeight, 200); // DOM 업데이트 후 높이 재계산
+  }, [selectedItems, displayErrors, nameEnglishWarning, emailKoreanWarning]);
+
   const handleCheckboxChange = (productName, checked) => {
     const productInfo = products.find(p => p.name === productName);
     
