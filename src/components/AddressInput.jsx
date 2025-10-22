@@ -62,28 +62,8 @@ const AddressInput = ({
 
   return (
     <div className="space-y-4">
-      {/* 우편번호와 주소 검색을 한 줄에 */}
+      {/* 주소 검색과 우편번호를 한 줄에 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* 우편번호 필드 */}
-        <div className="relative">
-          <input
-            type="text"
-            id={`${name}PostalCode`}
-            name={`${name}PostalCode`}
-            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer ${className}`}
-            placeholder=" "
-            value={postalCodeValue || ''}
-            readOnly
-            disabled={disabled}
-          />
-          <label
-            htmlFor={`${name}PostalCode`}
-            className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-gray-50 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1"
-          >
-            우편번호
-          </label>
-        </div>
-
         {/* 주소 검색 필드 */}
         <div className="relative md:col-span-2">
           <input
@@ -111,6 +91,26 @@ const AddressInput = ({
           >
             <Search className="w-4 h-4" />
           </button>
+        </div>
+
+        {/* 우편번호 필드 */}
+        <div className="relative">
+          <input
+            type="text"
+            id={`${name}PostalCode`}
+            name={`${name}PostalCode`}
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer ${className}`}
+            placeholder=" "
+            value={postalCodeValue || ''}
+            readOnly
+            disabled={disabled}
+          />
+          <label
+            htmlFor={`${name}PostalCode`}
+            className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-gray-50 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1"
+          >
+            우편번호
+          </label>
         </div>
       </div>
 
