@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2 } from 'lucide-react';
 import AddressInput from '@/components/AddressInput';
 
-const affiliations = ["GOAT", "감동", "다올", "다원", "달", "라온", "유럽", "직할", "캐슬", "해성", "혜윰"];
+const affiliations = ["GOAT", "감동", "다올", "다원", "달", "라온", "미르", "유럽", "직할", "캐슬", "해성", "혜윰"];
 const products = [
   { name: "웰컴키트", price: 33000 },
   { name: "보험가이드북", price: 9200 },
