@@ -21,6 +21,20 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Check if environment variables are set
+  if (!SENDER_EMAIL || !SENDER_APP_PASSWORD || !RECIPIENT_EMAIL) {
+    console.error('Missing environment variables:', {
+      SENDER_EMAIL: !!SENDER_EMAIL,
+      SENDER_APP_PASSWORD: !!SENDER_APP_PASSWORD,
+      RECIPIENT_EMAIL: !!RECIPIENT_EMAIL
+    });
+    return res.status(500).json({
+      success: false,
+      error: 'Server configuration error',
+      details: 'Email environment variables are not configured. Please check Vercel environment variables settings.'
+    });
+  }
+
   const { name, affiliation, phone, email, items_summary, total, full_address } = req.body;
   const formattedDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
