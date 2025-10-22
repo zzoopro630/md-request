@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import emailjs from '@emailjs/browser';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -209,9 +208,9 @@ const CheckboxGridPage = () => {
     setFormData(prev => ({ ...prev, affiliation: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const newErrors = {};
     if (!formData.name) newErrors.name = "이름을 확인해주세요";
     if (nameEnglishWarning) newErrors.name = nameEnglishWarning;
@@ -227,25 +226,44 @@ const CheckboxGridPage = () => {
         setDisplayErrors(newErrors);
         return;
     }
-    
+
     setDisplayErrors({});
     setIsSubmitting(true);
 
-    const serviceID = 'service_gf7tr94';
-    const templateID = 'template_5wlvuso';
-    const publicKey = 'si6sUamB5hB5f3V6d';
     const itemsSummary = selectedItems.map(item => `${item.name} - 수량: ${item.quantity}, 금액: ${item.total.toLocaleString()}원`).join('<br>');
     const fullAddress = `[우: ${formData.postalCode}] ${formData.address} ${formData.detailAddress}`;
-    const templateParams = { ...formData, items_summary: itemsSummary, total: total.toLocaleString(), full_address: fullAddress };
-    
-    emailjs.init(publicKey);
-    emailjs.send(serviceID, templateID, templateParams)
-      .then(() => {
-        navigate('/order-confirmation');
-      }, (err) => {
-        setDisplayErrors({ submit: `이메일 발송에 실패했습니다: ${err.text}` });
-        setIsSubmitting(false);
+
+    const payload = {
+      name: formData.name,
+      affiliation: formData.affiliation,
+      phone: formData.phone,
+      email: formData.email,
+      items_summary: itemsSummary,
+      total: total.toLocaleString(),
+      full_address: fullAddress
+    };
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.details || '이메일 발송에 실패했습니다.');
+      }
+
+      navigate('/order-confirmation');
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      setDisplayErrors({ submit: `이메일 발송에 실패했습니다: ${error.message}` });
+      setIsSubmitting(false);
+    }
   };
 
   return (
