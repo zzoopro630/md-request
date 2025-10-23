@@ -11,7 +11,7 @@ import AddressInput from '@/components/AddressInput';
 
 const affiliations = ["GOAT", "감동", "다올", "다원", "달", "라온", "미르", "유럽", "직할", "캐슬", "해성", "혜윰"];
 const products = [
-  { name: "웰컴키트", price: 33000 },
+  { name: "웰컴키트패키지", price: 33000 },
   { name: "보험가이드북", price: 9200 },
   { name: "바인더+볼펜", price: 19000 },
   { name: "고객노트", price: 3500 },
